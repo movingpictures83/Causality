@@ -1,48 +1,76 @@
-rm(list = ls())
+#rm(list = ls())
 
 library(bnlearn)
-setwd("D:\\FIU\\Causal Network Inference in Cancer") # This is input folder, input and output file will be in this directory
+#setwd("D:\\FIU\\Causal Network Inference in Cancer") # This is input folder, input and output file will be in this directory
 
 
 bootfile <- "boot_strength.csv"
-filename_dir <- "directed.csv"
-filename_undir <- "undirected.csv"
-data_file_name <- "your_data_set.csv" #input file
+data_file_name <- "asv.transpose.norm.csv" #input file
 con_file_name <- "output_file.xgmml" #output file
 network_csv_file <- "disease_bn.csv"
 graph_id <-  1001
 
+
+##########################################################################################
+# PC STABLE
+# Input: asv.transpose.norm.csv
+# Output: Plot
+print("RUNNING PC STABLE...")
 #### Pc stable Algorithm
 df <- read.csv(data_file_name)
+df <- df[,-1]
 dades <- lapply(df, as.numeric)
 bn_df <- data.frame(dades)
 bn_df <- na.omit(bn_df)
-
+print(bn_df)
+print(str(bn_df))
 resGS<- pc.stable(bn_df, cluster = NULL,whitelist = NULL, blacklist = NULL, test = "zf",
                   alpha = 0.05, B = NULL, debug = F, undirected = FALSE)
 
+print("DONE.")
+print("PLOTTING...")
 ####
 plot(resGS)
+print("DONE.")
+##########################################################################################
 
-sum_of_col <- data.frame(colnames(bn_df),colSums(bn_df))
-col_name <- colnames(bn_df)
 
+##########################################################################################
 #### V-structures
-# vstruct <- vstructs(resGS, arcs = FALSE, moral = TRUE, debug = FALSE)
-# write.csv(vstruct,"kera_gingiva_vstructure.csv")
+# Input: regGS.pcstable.rds
+# Output: vstructures.csv
+vstruct <- vstructs(resGS, arcs = FALSE, debug = FALSE)
+write.csv(vstruct,"kera_gingiva_vstructure.csv")
+##########################################################################################
 
-#### End of V-structures
+##########################################################################################
+#### Directed Arcs
+# Input: regGS.pcstable.rds
+# Ouptut: directed.csv
+filename_dir <- "directed.csv"
 di_arcs_kera_gingiva <- directed.arcs(resGS)
 write.csv(di_arcs_kera_gingiva,filename_dir,row.names=F)
+##########################################################################################
 
+##########################################################################################
+#### Undirected Arcs
+filename_undir <- "undirected.csv"
 undi_arcs_kera_gingiva <- undirected.arcs(resGS)
 write.csv(undi_arcs_kera_gingiva,filename_undir,row.names=F)
+##########################################################################################
 
+
+##########################################################################################
+#### Boot Strength
+# Input: asv.transpose.norm.csv
+# Output: boot_strength.csv
 temp_dat <- na.omit(bn_df)
-
 boot_strength <- boot.strength(temp_dat, R = 1, algorithm = "pc.stable") #Change bootstrap
 write.csv(boot_strength,bootfile,row.names=F)
+##########################################################################################
 
+
+##########################################################################################
 #### Drop out of redundant edges
 data <- read.csv(filename_undir,header = TRUE, colClasses=c("from"="character","to"="character"))
 bn_df <- data.frame(data)
@@ -280,6 +308,8 @@ name <- network_csv_file
 
 #### -------------------CoN--------------------------------------------
 
+sum_of_col <- data.frame(colnames(bn_df),colSums(bn_df))
+col_name <- colnames(bn_df)
 sink(con_file_name)
 cat("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>\n")
 cat(sprintf("<graph id=\"%d\" label=\"%s\" directed=\"1\" cy:documentVersion=\"3.0\" xmlns:dc=\"http://purl.org/dc/elements/1.1/\" xmlns:xlink=\"http://www.w3.org/1999/xlink\" xmlns:rdf=\"http://www.w3.org/1999/02/22-rdf-syntax-ns#\" xmlns:cy=\"http://www.cytoscape.org\" xmlns=\"http://www.cs.rpi.edu/XGMML\">",graph_id,name))

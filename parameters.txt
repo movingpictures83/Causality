@@ -1,0 +1,7 @@
+undirected	undirected.csv
+directed	directed.csv
+datafile	asv.transpose.norm.csv
+bootfile	bootstrength.csv
+group1	early.txt
+group2	late.txt
+graphid	1001

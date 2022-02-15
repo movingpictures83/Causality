@@ -1,0 +1,9 @@
+Prefix pipelines/Causality
+Plugin CSVTranspose inputfile asv_tab_merged.csv outputfile asv.transpose.csv
+Plugin CSVNormalize inputfile asv.transpose.csv outputfile asv.transpose.norm.csv
+Plugin PCStable inputfile asv.transpose.norm.csv outputfile resGS.pcstable.rds
+Plugin VStructures inputfile resGS.pcstable.rds outputfile vstructs.csv
+Plugin ArcDirect inputfile resGS.pcstable.rds outputfile directed.csv
+Plugin ArcUndirect inputfile resGS.pcstable.rds outputfile undirected.csv
+Plugin BootStrength inputfile asv.transpose.norm.csv outputfile bootstrength.csv
+Plugin CausalNetwork inputfile parameters.txt outputfile myoutput
